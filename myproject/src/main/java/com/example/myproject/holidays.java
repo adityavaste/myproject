@@ -7,6 +7,6 @@ public class holidays{
     @GetMapping("/holidays")
 
 
-    public String getData() {return "please book your holidays ticket";};
+    public String getData() {return "please book your holidays ticket free free free";};
 
 }
