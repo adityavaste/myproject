@@ -1,0 +1,44 @@
+pipeline {
+    agent any
+
+    parameters {
+        choice(
+            name: 'AWS_RESOURCE',
+            choices: ['EC2', 'S3', 'IAM'],
+            description: 'Select the AWS resource to check'
+        )
+    }
+
+    environment {
+        AWS_DEFAULT_REGION = 'us-east-1'
+    }
+
+    stages {
+        stage('Check AWS Resource') {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+                    script {
+                        if (params.AWS_RESOURCE == 'EC2') {
+                            sh '''
+                            echo "Checking EC2 Instances..."
+                            aws ec2 describe-instances --query "Reservations[*].Instances[*].State.Name" --output table
+                            '''
+                        } else if (params.AWS_RESOURCE == 'S3') {
+                            sh '''
+                            echo "Listing S3 Buckets..."
+                            aws s3 ls
+                            '''
+                        } else if (params.AWS_RESOURCE == 'IAM') {
+                            sh '''
+                            echo "Listing IAM Users..."
+                            aws iam list-users --output table
+                            '''
+                        } else {
+                            error("Unsupported resource type")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
