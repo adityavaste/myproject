@@ -1,0 +1,46 @@
+pipeline {
+    agent any
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '3', artifactNumToKeepStr: '3'))
+    }
+
+    tools {
+        maven 'maven-3.9.9'
+    }
+
+    stages {
+        stage('Code Compilation') {
+            steps {
+                echo '🔧 Starting Code Compilation...'
+                sh 'mvn clean compile'
+                echo '✅ Code Compilation Completed Successfully!'
+            }
+        }
+
+        stage('Code QA Execution') {
+            steps {
+                echo '🧪 Running JUnit Test Cases...'
+                sh 'mvn test'
+                echo '✅ JUnit Test Cases Completed Successfully!'
+            }
+        }
+
+        stage('Code Package') {
+            steps {
+                echo '📦 Creating jar Artifact...'
+                sh 'mvn package'
+                echo '✅ jar Artifact Created Successfully!'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Build completed successfully.'
+        }
+        failure {
+            echo '❌ Build failed.'
+        }
+    }
+}
